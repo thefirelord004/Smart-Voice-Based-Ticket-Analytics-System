@@ -60,7 +60,7 @@ To get a copy of the project up and running on your local machine for developmen
 
 1.  **Clone the repository:**
     ```bash
-    git clone [YOUR_REPOSITORY_URL_HERE]
+    git clone https://github.com/thefirelord004/Smart-Voice-Based-Ticket-Analytics-System
     cd ticket-managment-system
     ```
 2.  **Create a virtual environment (recommended):**
