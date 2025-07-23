@@ -1,0 +1,66 @@
+name: Build and deploy Node.js app to Azure Web App - ticket-api-service
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies and build (if applicable)
+        run: |
+          npm install
+          npm run build --if-present
+
+      - name: Zip app for deployment
+        run: zip -r release.zip ./*
+
+      - name: Upload artifact for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-api
+          path: release.zip
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node-api
+
+      - name: Unzip artifact
+        run: unzip release.zip
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F006610370DA421CAB7F8F9C576DE851 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5494FFAD65534510B8813B315AB5CE2E }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_01559A4BD4554099B2D718B42310B920 }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'ticket-api-service'
+          slot-name: 'Production'
+          package: .
